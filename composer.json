@@ -1,0 +1,11 @@
+{
+  "name": "br0sk/yiiron",
+  "type": "yii-extension",
+  "require": {
+    "composer/installers": "~1.0",
+    "iron-io/iron_core": "dev-master",
+    "iron-io/iron_worker": "dev-master",
+    "iron-io/iron_mq": "dev-master",
+    "iron-io/iron_cache": "dev-master"
+   }
+}
