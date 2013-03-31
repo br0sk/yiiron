@@ -36,7 +36,7 @@ It would look something like this: `/var/www/myapp/protected/extensions/yiiron`
 
 Add this to your config file (don't forget to add it to the console.php if you want to use the IronWorkers)
 	
-	import'=>array('application.components.yiiron.*',)
+	import'=>array('ext.yiiron.*',)
 
 Add this to the component section...
 

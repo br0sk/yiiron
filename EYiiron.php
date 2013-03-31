@@ -14,17 +14,6 @@
  * @license New BSD License
  */
 
-/**
- * Fix to not include the class twice in Unit tests. This fixes a problem with installing PHPUnit using Composer.
- * note: If you are using a PEAR installation of PHPUnit you might need to remove the if statement.
- */
-if(Yii::app()->getComponent('fixture') === null)
-{
-  require_once('IronCore.class.php');
-  require_once('IronWorker.class.php');
-  require_once('IronMQ.class.php');
-  require_once('IronCache.class.php');
-}
 
 class EYiiron extends CApplicationComponent
 {
@@ -62,6 +51,15 @@ class EYiiron extends CApplicationComponent
   public $workerFileCopyOptions = array();
 
   /**
+   * Needs to be set to true if the extension has been installed via Composer.
+   * In case of the installation being installed by composer the iron.io classes have been installed
+   * to the vendor library. If the extension is installed directly from the zip file the iron.io files
+   * are bundled.
+   *
+   * @var bool
+   */
+  public $composer = false;
+  /**
    * This is the request object for iron MQ
    * @var IronMQ
    */
@@ -86,14 +84,40 @@ class EYiiron extends CApplicationComponent
    * @param string $token This is the IronIo token. It is used for the auth.
    * @param string $projectId This is the project id. This is useful since we can create several connectors to different projects.
    * @param array $workerFileCopyOptions Supply it on the format of the options parameter for CFileHelper::copyDirectory().
+   * @param boolean $composer Indicate if the extension has been installed via composer
    * @param array $services
    */
-	public function __construct($token='',$projectId='',$services=array('mq', 'worker', 'cache'),$workerFileCopyOptions=array('exclude' => array('.git', '.csv', '.svn', '.zip', "/runtime")))
+	public function __construct($token='',$projectId='',$services=array('mq', 'worker', 'cache'),$workerFileCopyOptions=array('exclude' => array('.git', '.csv', '.svn', '.zip', "/runtime")),$composer=false)
 	{
 		$this->token=$token;
 		$this->projectId=$projectId;
 		$this->services=$services;
     $this->workerFileCopyOptions=$workerFileCopyOptions;
+    $this->composer=$composer;
+    /**
+     * Fix to not include the class twice in Unit tests. This fixes a problem with installing PHPUnit using Composer.
+     * note: If you are using a PEAR installation of PHPUnit you might need to remove the if statement.
+     */
+    if(Yii::app()->getComponent('fixture') === null)
+    {
+      if($this->composer)
+      {
+        Yii::import('application.vendors.*');
+        require_once('iron-io/iron_core/IronCore.class.php');
+        require_once('iron-io/iron_worker/IronWorker.class.php');
+        require_once('iron-io/iron_mq/IronMQ.class.php');
+        require_once('iron-io/iron_worker/IronCache.class.php');
+      }
+      else
+      {
+        require_once('lib/IronCore.class.php');
+        require_once('lib/IronWorker.class.php');
+        require_once('lib/IronMQ.class.php');
+        require_once('lib/IronCache.class.php');
+      }
+
+
+    }
 	}
 
   /**
