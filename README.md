@@ -6,8 +6,8 @@ Yiiron is a Yii extension that integrates the services of [iron.io](http://iron.
 [Iron.io](http://iron.io?rc=je1 ) offers three services:
 
 - **IronMQ** - A message Queue for the Cloud (10 Million free API Requests / month Unlimited Queues)
-- **IronWorkers** - A worker platform that runs tasks in the background, in parallel, and at massive scale (200 Free Hours per month, that is over 6 hours per day, 50 Concurrent Tasks, 25 Scheduled Jobs)
-- **IronCache**  - Key/Value Data Cache (offers: 100 MB storage and 10M API Requests /month)
+- **IronWorkers** - A worker platform that runs tasks in the background, in parallel, and at massive scale (200 Free Hours per month, that is over 6 hours per day, 50 concurrent Tasks, 25 Scheduled Jobs)
+- **IronCache**  - Key/Value Data Cache (offers: 100 MB storage and 10 Million API Requests /month)
 
 ## Why should you use Yiiron?
 If you ask your self any of these questions you should probably try it:
@@ -22,6 +22,12 @@ If you ask your self any of these questions you should probably try it:
 ## Requirements
 - Your application needs to be  hosted on AWS. This is not actually a requirement but all the [iron.io](http://iron.io?rc=je1) services are hosted on AWS and to get the full speed of the services and as little latency as possible your applications should be hosted on the AWS infrastructure. The services are based on REST so in theory you can use them from any computer that is connected to the internet and for instance adding data to IronMQ usually works fine with low latency in a cross cloud environment.
 
+## Resources
+- GitHub page(for forks and trouble reports): [https://github.com/br0sk/yiiron](https://github.com/br0sk/yiiron)  
+- Packagist page(for Composer download): [https://packagist.org/packages/br0sk/yiiron](https://packagist.org/packages/br0sk/yiiron)  
+- iron.io dev center(for full details on the services including full API documentation) - [http://dev.iron.io/](http://dev.iron.io/)
+
+
 ## Getting Started
 If you don’t already have an [iron.io](http://iron.io?rc=je1) account please sign up for a free account [here](http://www.iron.io?rc=je1).
 
@@ -32,7 +38,8 @@ When the project is created click the key icon and take a note of the token and 
 Unzip `yiiron.zip` file that you downloaded from the [Yiiron Yii extension page](http://www.yiiframework.com/extension/yiiron) and put all the files in the extensions directory. 
 It would look something like this: `/var/www/myapp/protected/extensions/yiiron`  
 
-**Note:** If you download the code from [GitHub](https://github.com/br0sk/yiiron) you will get some example code and the unit tests. The zipfile that is hosted with the extension just contains the latest files needed to use the extension.
+**Note:** You can also install the the extension using Composer. It uses the new [Yii Composer installer](https://github.com/composer/installers/pull/61). 
+Remember to set the composer flag for the extension to false if you used the zip file and set it to true if you have installed using composer. This is needed since the iron.io classes will be found in different locations based on how it was installed.
 
 Add this to your config file (don't forget to add it to the console.php if you want to use the IronWorkers)
 	
@@ -45,6 +52,7 @@ Add this to the component section...
     	'token'  => ‘your_iron_io_token’,
     	'projectId'  => 'your_iron_io_project_id',
     	'services'   => array('mq','worker',’cache’),
+		'composer'	=> false,
     	'workerFileCopyOptions' => array('exclude' => array('.git','.csv','.svn', '.zip', "/runtime"))
      	),
     
@@ -65,9 +73,9 @@ Congrats everything is working and you can start to use the iron.io services!
 ## How to use the services
 You can now call the different services since we have verified the connection is OK in “Getting started” above.
 
-The iron.io PHP API was used to build Yiiron. All the public methods of the APIs [github.com/iron-io/iron\\_mq\\_php](https://github.com/iron-io/iron_mq_php), [github.com/iron-io/iron\\_worker\\_php](https://github.com/iron-io/iron_worker_php), [github.com/iron-io/iron\\_cache\\_php](https://github.com/iron-io/iron_cache_php) have been wrapped in the Yiiron component.
+The iron.io PHP API was used to build Yiiron. All the public methods of the API's [github.com/iron-io/iron\\_mq\\_php](https://github.com/iron-io/iron_mq_php), [github.com/iron-io/iron\\_worker\\_php](https://github.com/iron-io/iron_worker_php), [github.com/iron-io/iron\\_cache\\_php](https://github.com/iron-io/iron_cache_php) have been wrapped in the Yiiron component.
 
-To make use of the auto complete function in most editors I suggest you initialise the Yiiron component once and save it in a local variable like this:
+To make use of the auto complete function in most editors I suggest that you initialise the Yiiron component once and save it in a local variable like this:
 
     /**
      * @var $yiiron EYiiron The iron.io connector
@@ -129,7 +137,7 @@ You can use the IronWorkers in two ways. The first way is to simply use the wrap
 
 The second and preferred way of using IronWorkers is to run the worker as a Yii command line application ([Yii CLI documentation](http://www.yiiframework.com/doc/guide/1.1/en/topics.console)). By extending the class  **EIronWorkersCommand** instead of  **CConsoleCommand** directly you will now get access to extra functionality that will allow you to run your command line actions directly as an IronWorker without making any changes to the the Yii API. 
 
-This basically means that you can run your currently existing command actions on IronWorkers only by changing the class that your command extends.
+This basically means that you can run your currently existing command actions as IronWorkers only by changing the class that your command extends.
 
 ### Here is a practical example step by step.
 
@@ -163,9 +171,9 @@ Here is a simple version of this file.
     );
     
 
-In a more advanced appplication you would probably want to add more stuff to that config file or even merge in the `console.php` file. Be careful because the IronWorker runtime evironment might not support everything that your production server supports, for more details have a look [here](http://dev.iron.io/worker/languages/php/#environment?rc=je1) and [here]( http://dev.iron.io/worker/reference/environment/?rc=je1) for more information on the runtime environment. 
+In a more advanced appplication you would probably want to add more stuff to that config file or even merge in the `console.php` file. Be careful because the IronWorker runtime environment might not support everything that your production server supports, for more details have a look [here](http://dev.iron.io/worker/languages/php/#environment?rc=je1) and [here]( http://dev.iron.io/worker/reference/environment/?rc=je1) for more information on the runtime environment. 
 
-Now create a command line application by creating a file called **CronjobsCommand.php** and save it in the command folder in Yii, it will look something like this `/var/www/myapp/protected/commands/CronjobsCommand.php`.
+Now create a command line application by creating a file called **CronjobsCommand.php**(this is just an example it works fine with any command file name that Yii allows) and save it in the command folder in Yii, it will look something like this `/var/www/myapp/protected/commands/CronjobsCommand.php`.
 
 Add this code to the file:
 
