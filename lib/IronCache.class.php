@@ -5,7 +5,7 @@
  * @link https://github.com/iron-io/iron_cache_php
  * @link http://www.iron.io/products/cache
  * @link http://dev.iron.io/
- * @version 0.1.2
+ * @version 0.1.3
  * @package IronCache
  * @copyright Feel free to copy, steal, take credit for, or whatever you feel like doing with this code. ;)
  */
@@ -50,7 +50,7 @@ class IronCache_Item {
     }
 
     public function setValue($value) {
-        if(empty($value)) {
+        if ($value === null) {
             throw new InvalidArgumentException("Please specify a value");
         } else {
             $this->value = $value;
@@ -105,8 +105,8 @@ class IronCache_Item {
     }
 }
 
-class IronCache extends IronCore{
-    protected $client_version = '0.1.2';
+class IronCache extends IronCore {
+    protected $client_version = '0.1.3';
     protected $client_name    = 'iron_cache_php';
     protected $product_name   = 'iron_cache';
     protected $default_values = array(
