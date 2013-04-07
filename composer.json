@@ -1,7 +1,10 @@
 {
   "name": "br0sk/yiiron",
   "type": "yii-extension",
+  "description": "Yiiron is a Yii extension that integrates the services of iron.io in the Yii Famework",
   "license": "New BSD License",
+  "keywords": ["cache","mq","workers","iron.io","yii"],
+  "homepage": "http://www.yiiframework.com/extension/yiiron/",
   "authors": [
     {
       "name": "John Eskilsson",
