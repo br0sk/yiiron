@@ -13,8 +13,6 @@
  * @copyright 2013
  * @license New BSD License
  */
-
-
 class EYiiron extends CApplicationComponent
 {
   /**
@@ -106,7 +104,7 @@ class EYiiron extends CApplicationComponent
         require_once('iron-io/iron_core/IronCore.class.php');
         require_once('iron-io/iron_worker/IronWorker.class.php');
         require_once('iron-io/iron_mq/IronMQ.class.php');
-        require_once('iron-io/iron_worker/IronCache.class.php');
+        require_once('iron-io/iron_cache/IronCache.class.php');
       }
       else
       {
@@ -115,8 +113,6 @@ class EYiiron extends CApplicationComponent
         require_once('lib/IronMQ.class.php');
         require_once('lib/IronCache.class.php');
       }
-
-
     }
 	}
 
@@ -258,6 +254,59 @@ class EYiiron extends CApplicationComponent
     {
       return $this->_mq;
     }
+
+  /********** All the improved worker functionality **************/
+
+  /**
+   * This method can execute any command line action as an IronWorker. The command line actions are normally
+   * executed directly in a shell. This method has been build so that we can fire off the command line actions
+   * directly from any Yii code. This way we don't have to fork off a process just to push an action to IronWorkers.
+   *
+   * Here is an example:
+   * This is how we can run a command from the command line to push it to IronWorkers
+   * ./yiic cronjobs myAction --param1=34 --ironWorker=true
+   *
+   * In order to run this action directly from for instance a controller you can do this:
+   * $yiiron = Yii::app()->yiiron;
+   * $yiiron->workerRunYiiAction('cronjobs', 'myAction', array('--param1=34', '--ironWorker=true'));
+   *
+   * If you leave out '--ironWorker=true' you can run the same command but locally not pushing it to IronWorkers.
+   *
+   * @note Remember that only none interactive command line actions can be run this way.
+   *
+   * @param null $command This is the command name. If the command class is CronjobsCommand this will be "cronjobs".
+   * @param null $action This is the name of the command. If the command is called actionDownloadFile this will be "downloadFile"
+   * @param array $options This is the array of parameters that can be sent in to the action.
+   * It is an array of strings on this format array("--filePath=/tmp/my_file.txt", "--newFileName=my_new_file.txt")
+   * @param boolean $silent Set this to true  to suppress any output coming from the command line action. This is only
+   * valid for the code being run locally. When you check the log in the iron.io hub you will still see the trace.
+   * @param string $entryScript This is normally the string "yiic". You will only have to set this if you are using a custom
+   * entry script.
+   */
+  public function workerRunYiiAction($command=null, $action=null, $options=array(), $silent=true, $entryScript="yiic") {
+    $commandPath = Yii::app()->getBasePath() . DIRECTORY_SEPARATOR . 'commands';
+    $runner = new CConsoleCommandRunner();
+    $runner->addCommands($commandPath);
+
+    $args = array($entryScript, $command, $action);
+
+    //Add in the options
+    foreach ($options AS $option)
+    {
+      $args[] = $option;
+    }
+    //Buffer the output to go silent not outputting text when using the commands in non CLI code
+    ob_start();
+    $runner->run($args);
+    //Discard the output if silent
+    if($silent)
+      ob_end_clean();
+    else
+      echo htmlentities(ob_get_clean(), null, Yii::app()->charset);
+  }
+
+
+
 
   /********** All the MQ wrappers **************/
 

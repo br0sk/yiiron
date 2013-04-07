@@ -54,8 +54,13 @@ class EIronWorkersCommand extends CConsoleCommand
   public function run($args)
   {
     //Store the parameters passed to the function, will be used to pass on to the iron workers
-    $this->yiicParams = $_SERVER['argv'];
+    $this->yiicParams = $args;
+    //Add in the command name
+    array_unshift($this->yiicParams, $this->getName());
+    //Add in the entry script name
+    array_unshift($this->yiicParams, "./".$this->getCommandRunner()->getScriptName());
 
+    CVarDumper::dump($this->yiicParams, 100, false);
     if($this->isIronWorker())
     {
       $this->ironWorker = true;
@@ -63,9 +68,12 @@ class EIronWorkersCommand extends CConsoleCommand
       //Kick the command off to Iron Workers
       $resId = $this->runAsIronWorker();
       echo("Task ".$resId." pushed to Iron Worker!\n");
-      Yii::app()->end();
     }
-    parent::run($args);
+    //If we are running this as normal just run the parent implementation
+    else
+    {
+      parent::run($args);
+    }
   }
 
   /**

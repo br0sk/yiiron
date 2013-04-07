@@ -1,6 +1,6 @@
 <?php
 /**
- * This class unit tests the the iron IO connector.
+ * This class unit tests the iron IO connector.
  *
  *
  */
@@ -116,7 +116,7 @@ class IronIoConnectorTest extends EComposerTestCase
     //Try to connect with faulty project
     self::$iio->token = "faulty_token";
     self::$iio->connect();
-    $mq = self::$iio->mqGetQueues();
+    self::$iio->mqGetQueues();
   }
 
   /**
@@ -307,6 +307,8 @@ class IronIoConnectorTest extends EComposerTestCase
    */
   public function testGetAndDeleteMessages()
   {
+    self::$iio->disconnect();
+    self::$iio->services = array('mq');
     self::$iio->connect();
 
     //Get rid of all the messages on the test queue

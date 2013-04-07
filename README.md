@@ -211,6 +211,25 @@ Great, now you have a remote server that runs your heavy cronjobs that used to b
 
 	./yiic cronjobs myAction --ironWorker=true --ironWorkerPriority=0 --ironWorkerTimeout=20 --ironWorkerDelay=30
 
+Since `1.0.3` you can now run the command line actions directly in any code. You use the method called `workerRunYiiAction()` for this.
+
+This method can execute any command line action as an IronWorker. The command line actions are normally executed directly in a shell. This method has been build so that we can fire off the command line actions directly from any Yii code. This way we don't have to fork off a process just to push an action to IronWorkers.
+
+Here is an example:
+
+This is how we can run a command from the command line to push it to IronWorkers
+	
+	./yiic cronjobs myAction --param1=34 --ironWorker=true
+   
+In order to run this action directly from for instance a controller you can do this:
+
+	$yiiron = Yii::app()->yiiron;
+   	$yiiron->workerRunYiiAction('cronjobs', 'myAction', array('--param1=34', '--ironWorker=true'));
+
+
+**Tip:** If you leave out `'--ironWorker=true'` you can run the same command but locally not pushing it to IronWorkers.
+
+
 More documentation about the parameters can be found in the class `EIronWorkersCommand`.
 
 ## How to use IronCache
