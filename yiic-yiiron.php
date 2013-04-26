@@ -12,9 +12,20 @@
 //Get all the params
 $params = getArgs();
 
+//The path from the base folder to the folder of the app, usually called protected
+$relativeAppPath = $params['payload']->relativeAppPath;
+
 //For the Iron Worker we only need the Yiic params, if more data is needed just add it
 //as parameters to your yiic command
 $yiicParams = $params['payload']->yiicParams;
+
+//This array will keep the data that you add to the config file that is configured in the
+//Yiiron plugin
+$configParamsArray = $params['config'];
+
+//Update the app path to reflect the path on IronWorkers. This will overwrite anything
+//that you added in the file locally in your system.
+$configParamsArray['basePath'] = '/task/app/'.$relativeAppPath;
 
 //Check that we are not trying to upload the iron worker when we run as an Iron worker
 if($yiicParams[2] == 'uploadIronWorker')
@@ -35,8 +46,9 @@ foreach($yiicParams AS $i=>$param)
     unset($yiicParams[$i]);
   }
 }
-//The path from the base folder to the folder of the app, usually called protected
-$relativeAppPath = $params['payload']->relativeAppPath;
+
+
+
 
 //Now set the yiic parameters
 $_SERVER['argv'] = $yiicParams;
@@ -52,8 +64,8 @@ chmod('/task/app/'.$relativeAppPath.'/runtime', 0777);
 //The path where we uploaded Yii
 $yiic=$taskPath.'yii/framework/yiic.php';
 
-//Set the iron.io specific config file
-$config=$taskPath.'app/'.$relativeAppPath.'/config/console_ironworker.php';
+//Set the iron.io specific config array
+$config=$configParamsArray;
 
 //Bootstrap Yii
 require_once($yiic);

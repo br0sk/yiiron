@@ -57,6 +57,13 @@ class EYiiron extends CApplicationComponent
    * @var bool
    */
   public $composer = false;
+
+  /**
+   * This is the path to the config file that shall be used when running as an IronWorker
+   * @var string
+   */
+  public $configFile  = 'config/console_ironworker.php';
+
   /**
    * This is the request object for iron MQ
    * @var IronMQ
@@ -85,13 +92,14 @@ class EYiiron extends CApplicationComponent
    * @param boolean $composer Indicate if the extension has been installed via composer
    * @param array $services
    */
-	public function __construct($token='',$projectId='',$services=array('mq', 'worker', 'cache'),$workerFileCopyOptions=array('exclude' => array('.git', '.csv', '.svn', '.zip', "/runtime")),$composer=false)
+	public function __construct($token='',$projectId='',$services=array('mq', 'worker', 'cache'),$workerFileCopyOptions=array('exclude' => array('.git', '.csv', '.svn', '.zip', "/runtime", "/config")),$composer=false, $configFile="config/console_ironworker.php")
 	{
 		$this->token=$token;
 		$this->projectId=$projectId;
 		$this->services=$services;
     $this->workerFileCopyOptions=$workerFileCopyOptions;
     $this->composer=$composer;
+    $this->configFile=$configFile;
     /**
      * Fix to not include the class twice in Unit tests. This fixes a problem with installing PHPUnit using Composer.
      * note: If you are using a PEAR installation of PHPUnit you might need to remove the if statement.
@@ -282,6 +290,7 @@ class EYiiron extends CApplicationComponent
    * valid for the code being run locally. When you check the log in the iron.io hub you will still see the trace.
    * @param string $entryScript This is normally the string "yiic". You will only have to set this if you are using a custom
    * entry script.
+   * @return integer The IronWorker id
    */
   public function workerRunYiiAction($command=null, $action=null, $options=array(), $silent=true, $entryScript="yiic") {
     $commandPath = Yii::app()->getBasePath() . DIRECTORY_SEPARATOR . 'commands';
@@ -295,14 +304,17 @@ class EYiiron extends CApplicationComponent
     {
       $args[] = $option;
     }
+
     //Buffer the output to go silent not outputting text when using the commands in non CLI code
     ob_start();
-    $runner->run($args);
+    $res = $runner->run($args);
     //Discard the output if silent
     if($silent)
       ob_end_clean();
     else
       echo htmlentities(ob_get_clean(), null, Yii::app()->charset);
+
+    return $res;
   }
 
 

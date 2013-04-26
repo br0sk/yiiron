@@ -50,6 +50,8 @@ class EIronWorkersCommand extends CConsoleCommand
   /**
    * Deciding if we are running the command locally or on Iron Workers
    * @see CConsoleCommand::run()
+   * @param $args array
+   * @return If run locally the exit code. If run as IronWorker the ironWorker id.
    */
   public function run($args)
   {
@@ -68,6 +70,8 @@ class EIronWorkersCommand extends CConsoleCommand
       //Kick the command off to Iron Workers
       $resId = $this->runAsIronWorker();
       echo("Task ".$resId." pushed to Iron Worker!\n");
+      //When run as an iron worker we return the IronWorker id
+      return $resId;
     }
     //If we are running this as normal just run the parent implementation
     else
@@ -183,8 +187,11 @@ class EIronWorkersCommand extends CConsoleCommand
     //This is so we can handle custom extension paths
     $ironWorkerExtensionPath = str_replace($appPath,"app/".basename($appPath)."/", Yii::app()->getExtensionPath());
 
+    //Read the config array into an array
+    $configFile = json_encode(require($yiiron->configFile));
+
     //Posting the code and the initial php file to execute. This on the Iron Worker platform, not locally
-    $res = $yiiron->workerPostCode($ironWorkerExtensionPath."/yiiron/yiic-yiiron.php", $tmpDir.'iron_worker.zip', $this->getName());
+    $res = $yiiron->workerPostCode($ironWorkerExtensionPath."/yiiron/yiic-yiiron.php", $tmpDir.'iron_worker.zip', $this->getName(), array('config'=>$configFile));
     echo("Finished uploading iron_worker.zip (" . EIronWorkersCommand::format_bytes(filesize($tmpDir.'iron_worker.zip')) . ")\n");
 
     //Remove all files

@@ -6,7 +6,7 @@
  * @link https://github.com/iron-io/iron_worker_php
  * @link http://www.iron.io/
  * @link http://dev.iron.io/
- * @version 1.3.8
+ * @version 1.4.0
  * @package IronWorkerPHP
  * @copyright Feel free to copy, steal, take credit for, or whatever you feel like doing with this code. ;)
  */
@@ -14,16 +14,16 @@
 /**
  * IronWorker internal exceptions representation
  */
-class IronWorker_Exception extends Exception{
+class IronWorker_Exception extends Exception {
 
 }
 
 /**
  * Class that wraps IronWorker API calls.
  */
-class IronWorker extends IronCore{
+class IronWorker extends IronCore {
 
-    protected $client_version = '1.3.8';
+    protected $client_version = '1.4.0';
     protected $client_name    = 'iron_worker_php';    
     protected $product_name   = 'iron_worker';
     protected $default_values = array(
@@ -74,6 +74,7 @@ class IronWorker extends IronCore{
      *  - "max_concurrency" The maximum number of tasks that should be run in parallel.
      *  - "retries" The number of auto-retries of failed task.
      *  - "retries_delay" Delay in seconds between retries.
+     *  - "config" : An arbitrary string (usually YAML or JSON) that, if provided, will be available in a file that your worker can access. File location will be passed in via the -config argument. The config cannot be larger than 64KB in size.
      * @return bool Result of operation
      * @throws Exception
      */
@@ -238,6 +239,7 @@ class IronWorker extends IronCore{
      *  - "max_concurrency" The maximum number of tasks that should be run in parallel.
      *  - "retries" The number of auto-retries of failed task.
      *  - "retries_delay" Delay in seconds between retries.
+     *  - "config" : An arbitrary string (usually YAML or JSON) that, if provided, will be available in a file that your worker can access. File location will be passed in via the -config argument. The config cannot be larger than 64KB in size.
      * @return mixed
      */
     public function postCode($filename, $zipFilename, $name, $options = array()){
@@ -628,32 +630,55 @@ class IronWorker extends IronCore{
      */
     private function workerHeader($worker_file_name){
         $header = <<<EOL
-        <?php
-        /*IRON_WORKER_HEADER*/
-        function getArgs(){
-            global \$argv;
-            \$args = array('task_id' => null, 'dir' => null, 'payload' => array());
-            foreach(\$argv as \$k => \$v){
-                if (empty(\$argv[\$k+1])) continue;
-                if (\$v == '-id') \$args['task_id'] = \$argv[\$k+1];
-                if (\$v == '-d')  \$args['dir']     = \$argv[\$k+1];
-                if (\$v == '-payload' && file_exists(\$argv[\$k+1])){
-                    \$args['payload'] = file_get_contents(\$argv[\$k + 1]);
-                    \$parsed_payload = json_decode(\$args['payload']);
-                    if (\$parsed_payload != null) {
-                        \$args['payload'] = \$parsed_payload;
-                    }
-                }
+<?php
+/*IRON_WORKER_HEADER*/
+function getArgs(){
+    global \$argv;
+
+    \$args = array('task_id' => null, 'dir' => null, 'payload' => array(), 'config' => null);
+
+    foreach(\$argv as \$k => \$v){
+        if (empty(\$argv[\$k + 1])) continue;
+
+        if (\$v == '-id') \$args['task_id'] = \$argv[\$k + 1];
+        if (\$v == '-d')  \$args['dir']     = \$argv[\$k + 1];
+
+        if (\$v == '-payload' && file_exists(\$argv[\$k + 1])){
+            \$args['payload'] = file_get_contents(\$argv[\$k + 1]);
+
+            \$parsed_payload = json_decode(\$args['payload']);
+
+            if (\$parsed_payload != null) {
+                \$args['payload'] = \$parsed_payload;
             }
-            return \$args;
         }
 
-        function getPayload(){
-            \$args = getArgs();
-            return \$args['payload'];
-        }
+        if (\$v == '-config' && file_exists(\$argv[\$k + 1])){
+            \$args['config'] = file_get_contents(\$argv[\$k + 1]);
 
-        require dirname(__FILE__)."/[SCRIPT]";
+            \$parsed_config = json_decode(\$args['config'], true);
+
+            if (\$parsed_config != null) {
+                \$args['config'] = \$parsed_config;
+            }
+        }
+    }
+    return \$args;
+}
+
+function getPayload(){
+    \$args = getArgs();
+
+    return \$args['payload'];
+}
+
+function getConfig(){
+    \$args = getArgs();
+
+    return \$args['config'];
+}
+
+require dirname(__FILE__)."/[SCRIPT]";
 EOL;
         $header = str_replace(
             array('[PROJECT_ID]','[URL]','[HEADERS]','[SCRIPT]'),

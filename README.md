@@ -53,7 +53,8 @@ Add this to the component section...
     	'projectId'  => 'your_iron_io_project_id',
     	'services'   => array('mq','worker',’cache’),
 		'composer'	=> false,
-    	'workerFileCopyOptions' => array('exclude' => array('.git','.csv','.svn', '.zip', "/runtime"))
+    	'workerFileCopyOptions' => array('exclude' => array('.git','.csv','.svn', '.zip', "/runtime", "/config")),
+		'configFile' => 'config/console_ironworker.php'
      	),
     
 This should be all!
@@ -171,7 +172,9 @@ Here is a simple version of this file.
     );
     
 
-In a more advanced appplication you would probably want to add more stuff to that config file or even merge in the `console.php` file. Be careful because the IronWorker runtime environment might not support everything that your production server supports, for more details have a look [here](http://dev.iron.io/worker/languages/php/#environment?rc=je1) and [here]( http://dev.iron.io/worker/reference/environment/?rc=je1) for more information on the runtime environment. 
+In a more advanced appplication you would probably want to add more stuff to that config file or even merge in the `console.php` file. Be careful because the IronWorker runtime environment might not support everything that your production server supports, for more details have a look [here](http://dev.iron.io/worker/languages/php/#environment?rc=je1) and [here]( http://dev.iron.io/worker/reference/environment/?rc=je1) for more information on the runtime environment.
+
+**Tip:** You can since version 1.0.4 use the parameter `configFile` to set the path of the config file to be used by Yiiron. It always defaults to `config/console_ironworker.php`
 
 Now create a command line application by creating a file called **CronjobsCommand.php**(this is just an example it works fine with any command file name that Yii allows) and save it in the command folder in Yii, it will look something like this `/var/www/myapp/protected/commands/CronjobsCommand.php`.
 
@@ -194,7 +197,8 @@ Run it locally like this:
 
 Now the magic starts.
  
-- Run the command `./yiic cronjobs uploadIronWorker`. This will output some trace to the screen and it will take a while to run especially if you are on a slow connection. This command packages both your application and the Yii framework in a zip file an publishes it to IronWorkers.  
+- Run the command `./yiic cronjobs uploadIronWorker`. This will output some trace to the screen and it will take a while to run especially if you are on a slow connection. This command packages both your application and the Yii framework in a zip file an publishes it to IronWorkers.   
+**Note:** As of version 1.0.4 the config file is no longer part of the zip package but uses the config parameter in the upload function. This means that the credentials you store in the your config file will no longer be available in the zip file that is being uploaded to IronWorkers. This is a more secure way of handling your credentials in the config file.    
 When it is finished you should be able to run the myTask command remotely as an IronWorker like this `./yiic cronjobs myAction --ironWorker=true`. 
 - Now go to [hud.iron.io/dashboard](https://hud.iron.io/dashboard). 
 - Click the IronWorker button next to the project we created earlier. The button has a cog on it. 
@@ -229,6 +233,7 @@ In order to run this action directly from for instance a controller you can do t
 
 **Tip:** If you leave out `'--ironWorker=true'` you can run the same command but locally not pushing it to IronWorkers.
 
+**Note:** As of 1.0.4 the method `workerRunYiiAction` now returns the IronWorker  task id if it is run with the option `ironWorker=true`. This way you can use the id to cancel the task or check for progress. 
 
 More documentation about the parameters can be found in the class `EIronWorkersCommand`.
 
