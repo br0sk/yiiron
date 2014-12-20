@@ -46,6 +46,12 @@ class EIronWorkersCommand extends CConsoleCommand
  * Can only be used when you run a command with --ironWorker=true
  */
   public $ironWorkerDelay = 0;
+	
+  /**
+ * @var int A human readable string to classify this task.
+ * Can only be used when you run a command with --ironWorker=true
+ */
+  public $ironWorkerTaskLabel = "";
 
   /**
    * Deciding if we are running the command locally or on Iron Workers
@@ -108,6 +114,11 @@ class EIronWorkersCommand extends CConsoleCommand
         {
           $parts = explode("=",$yiicParam);
           $this->ironWorkerDelay = intval($parts[1]);
+        }
+		if(stristr($yiicParam, "--ironWorkerTaskLabel"))
+        {
+          $parts = explode("=",$yiicParam);
+          $this->ironWorkerTaskLabel = $parts[1];
         }
       }
       return true;
@@ -220,7 +231,7 @@ class EIronWorkersCommand extends CConsoleCommand
     );
 
     //Set the iron worker properties and launch it
-    $res = $yiiron->workerPostTask($this->name, $payload, array('priority'=>$this->ironWorkerPriority, 'timeout'=>$this->ironWorkerTimeout, 'delay'=>$this->ironWorkerDelay));
+    $res = $yiiron->workerPostTask($this->name, $payload, array('priority'=>$this->ironWorkerPriority, 'timeout'=>$this->ironWorkerTimeout, 'delay'=>$this->ironWorkerDelay, 'label'=>$this->ironWorkerTaskLabel));
 
     //Return the Iron Worker task id
     return $res;

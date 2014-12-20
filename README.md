@@ -214,9 +214,9 @@ When it is finished you should be able to run the myTask command remotely as an 
 
 Great, now you have a remote server that runs your heavy cronjobs that used to bog your server down. You can now just add the flag `--ironWorker=true` at the end of the cronjob that runs the command and it will auto-magically be execute on IronWorkers. 
 
-**tip:** You can also set priority, timeout and delay like this if needed:
+**tip:** You can also set priority, timeout, delay and task label like this if needed:
 
-	./yiic cronjobs myAction --ironWorker=true --ironWorkerPriority=0 --ironWorkerTimeout=20 --ironWorkerDelay=30
+	./yiic cronjobs myAction --ironWorker=true --ironWorkerPriority=0 --ironWorkerTimeout=20 --ironWorkerDelay=30  --ironWorkerTaskLabel=MyLabel
 
 Since `1.0.3` you can now run the command line actions directly in any code. You use the method called `workerRunYiiAction()` for this.
 
