@@ -63,6 +63,12 @@ class EYiiron extends CApplicationComponent
    * @var string
    */
   public $configFile  = 'config/console_ironworker.php';
+	
+  /**
+   * This is the PHP version we are using, default is php-5.5.
+   * @var string
+   */
+  public $stack  = 'php-5.5';
 
   /**
    * This is the request object for iron MQ
@@ -92,14 +98,15 @@ class EYiiron extends CApplicationComponent
    * @param boolean $composer Indicate if the extension has been installed via composer
    * @param array $services
    */
-	public function __construct($token='',$projectId='',$services=array('mq', 'worker', 'cache'),$workerFileCopyOptions=array('exclude' => array('.git', '.csv', '.svn', '.zip', "/runtime", "/config")),$composer=false, $configFile="config/console_ironworker.php")
+	public function __construct($token='',$projectId='',$services=array('mq', 'worker', 'cache'),$workerFileCopyOptions=array('exclude' => array('.git', '.csv', '.svn', '.zip', "/runtime", "/config")),$composer=false, $configFile="config/console_ironworker.php", $stack="php-5.5")
 	{
 		$this->token=$token;
 		$this->projectId=$projectId;
 		$this->services=$services;
-    $this->workerFileCopyOptions=$workerFileCopyOptions;
-    $this->composer=$composer;
-    $this->configFile=$configFile;
+		$this->workerFileCopyOptions=$workerFileCopyOptions;
+		$this->composer=$composer;
+		$this->configFile=$configFile;
+		$this->stack=$stack;
     /**
      * Fix to not include the class twice in Unit tests. This fixes a problem with installing PHPUnit using Composer.
      * note: If you are using a PEAR installation of PHPUnit you might need to remove the if statement.

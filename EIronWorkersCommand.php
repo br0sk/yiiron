@@ -141,6 +141,7 @@ class EIronWorkersCommand extends CConsoleCommand
     //This is where we store the files before deploying them on iron.io
     $tmpDir = Yii::app()->getRuntimePath().DIRECTORY_SEPARATOR.'ironworkers'.DIRECTORY_SEPARATOR;
 
+	  echo("Using PHP Stack :". $yiiron->stack."\n");
     //Clean up in the directory. We do this before we start in case the old code was not fully removed.
     EIronWorkersCommand::deleteDir($tmpDir);
 
@@ -188,12 +189,12 @@ class EIronWorkersCommand extends CConsoleCommand
     $ironWorkerExtensionPath = str_replace($appPath,"app/".basename($appPath)."/", Yii::app()->getExtensionPath());
 
     //Read the config array into an array
-    $configFile = json_encode(require($yiiron->configFile));
+    $configFile = json_encode(require($appPath.$yiiron->configFile));
 
     //Posting the code and the initial php file to execute. This on the Iron Worker platform, not locally
-    $res = $yiiron->workerPostCode($ironWorkerExtensionPath."/yiiron/yiic-yiiron.php", $tmpDir.'iron_worker.zip', $this->getName(), array('config'=>$configFile));
+    $res = $yiiron->workerPostCode($ironWorkerExtensionPath."/yiiron/yiic-yiiron.php", $tmpDir.'iron_worker.zip', $this->getName(), array('config'=>$configFile, 'stack'=>$yiiron->stack));
     echo("Finished uploading iron_worker.zip (" . EIronWorkersCommand::format_bytes(filesize($tmpDir.'iron_worker.zip')) . ")\n");
-
+	  
     //Remove all files
     echo("Remove all temp files...\n");
     //EIronWorkersCommand::deleteDir($tmpDir);

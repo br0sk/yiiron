@@ -1,4 +1,6 @@
 <?php
+//We need to set this in order for the code to execute in a PHP 5.5 environment 
+date_default_timezone_set('UTC');
 /**
  * This is the Yii bootstrap file for running code on IronWorkers
  *

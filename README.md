@@ -54,10 +54,13 @@ Add this to the component section...
     	'services'   => array('mq','worker',’cache’),
 		'composer'	=> false,
     	'workerFileCopyOptions' => array('exclude' => array('.git','.csv','.svn', '.zip', "/runtime", "/config")),
-		'configFile' => 'config/console_ironworker.php'
+		'configFile' => 'config/console_ironworker.php',
+		'stack' => 'php-5.5'
      	),
     
 This should be all!
+
+As you can see you can set the PHP version you want to use when the code is executed as an IronWorker. Find the valid versions [here](http://dev.iron.io/worker/reference/environment/#default_language_versions). 
 
 Now test it by adding this to one of the actions in a controller:
 
